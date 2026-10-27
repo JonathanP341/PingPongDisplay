@@ -6,6 +6,8 @@ import './styles.css';
 
 type Tab = 'stats' | 'log';
 
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
 const app = document.querySelector('#app')!;
 let statsView: ReturnType<typeof createStatsView> | null = null;
 let logView: ReturnType<typeof createLogGameView> | null = null;

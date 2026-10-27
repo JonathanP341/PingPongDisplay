@@ -1,12 +1,14 @@
 :root {
+  color-scheme: dark;
   --orange: #fc4c02;
-  --orange-dark: #e04400;
-  --bg: #f0f0f2;
-  --surface: #ffffff;
-  --text: #242428;
-  --text-muted: #6d6d78;
-  --border: #e2e2e6;
-  --shadow: 0 2px 12px rgba(36, 36, 40, 0.08);
+  --orange-dark: #ff6a33;
+  --bg: #0e0e10;
+  --surface: #1c1c21;
+  --input: #141418;
+  --text: #f4f4f6;
+  --text-muted: #9b9ba6;
+  --border: #34343c;
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
   --nav-h: 64px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   font-family: 'Barlow', system-ui, sans-serif;
@@ -20,9 +22,11 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
   min-height: 100dvh;
+  background: var(--bg);
 }
 
 #app {
@@ -47,14 +51,14 @@ body {
 .status-bar {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  background: #fff4ef;
-  color: var(--orange-dark);
+  background: #2a1812;
+  color: #ffb089;
   text-align: center;
 }
 
 .status-bar.is-error {
-  background: #fdecea;
-  color: #b42318;
+  background: #2a1515;
+  color: #ffb4ab;
 }
 
 .view-title {
@@ -119,7 +123,7 @@ body {
   border-radius: 8px;
   font: inherit;
   font-size: 0.95rem;
-  background: var(--surface);
+  background: var(--input);
   color: var(--text);
 }
 
@@ -149,7 +153,8 @@ body {
   padding: 0.45rem 0.5rem;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--input);
+  color: var(--text);
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
@@ -180,6 +185,11 @@ body {
   align-items: stretch;
 }
 
+.score-wheel {
+  --wheel-h: 168px;
+  --item-h: 44px;
+}
+
 .score-wheel__label {
   text-align: center;
   font-size: 0.75rem;
@@ -188,34 +198,95 @@ body {
   margin-bottom: 0.25rem;
 }
 
+.score-wheel__frame {
+  position: relative;
+  height: var(--wheel-h);
+  border-radius: 999px;
+  background: var(--input);
+  border: 2px solid var(--border);
+  overflow: hidden;
+}
+
+.score-wheel__frame::before,
+.score-wheel__frame::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 52px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.score-wheel__frame::before {
+  top: 0;
+  background: linear-gradient(#141418, transparent);
+}
+
+.score-wheel__frame::after {
+  bottom: 0;
+  background: linear-gradient(transparent, #141418);
+}
+
 .score-wheel__viewport {
-  height: 140px;
+  height: 100%;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #fafafa 0%, #ececef 50%, #fafafa 100%);
-  border: 2px solid var(--border);
-  mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
-  -webkit-mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overflow-anchor: none;
+  scrollbar-width: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.score-wheel__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.score-wheel__viewport.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+.score-wheel__viewport:focus-visible {
+  outline: 2px solid rgba(252, 76, 2, 0.55);
+  outline-offset: -2px;
 }
 
 .score-wheel__list {
-  padding: 52px 0;
+  padding-block: calc((var(--wheel-h) - var(--item-h)) / 2);
 }
 
 .score-wheel__item {
+  height: var(--item-h);
   scroll-snap-align: center;
-  text-align: center;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.75rem;
   font-weight: 700;
-  line-height: 2.25rem;
   color: var(--text-muted);
-  transition: color 0.15s, transform 0.15s;
 }
 
 .score-wheel__item.is-selected {
   color: var(--orange);
-  transform: scale(1.08);
+}
+
+.score-wheel__highlight {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 50%;
+  height: var(--item-h);
+  transform: translateY(-50%);
+  border-radius: 12px;
+  background: rgba(252, 76, 2, 0.16);
+  border: 1px solid rgba(252, 76, 2, 0.55);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .form-message {
@@ -225,11 +296,11 @@ body {
 }
 
 .form-message.is-error {
-  color: #b42318;
+  color: #ffb4ab;
 }
 
 .form-message.is-success {
-  color: #067647;
+  color: #7ddea6;
 }
 
 .btn-publish {

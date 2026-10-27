@@ -8,13 +8,13 @@ export interface StatsView {
 
 const CHART_COLORS = [
   '#FC4C02',
-  '#242428',
-  '#6D6D78',
-  '#E87722',
-  '#4A4A52',
+  '#F2F2F4',
+  '#A7A7B2',
+  '#FF8A4C',
+  '#C8C8D0',
   '#FF6B35',
-  '#8B8B96',
-  '#C45C26',
+  '#8E8E9A',
+  '#E0A080',
 ];
 
 function renderEloChart(history: EloHistoryPoint[], playerNames: string[]): string {
