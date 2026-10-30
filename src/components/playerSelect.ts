@@ -9,7 +9,7 @@ export function createPlayerSelect(
   players: string[],
   placeholder: string,
   onChange: () => void
-): { el: HTMLElement; state: PlayerSelectState; setPlayers: (names: string[]) => void } {
+): { el: HTMLElement; state: PlayerSelectState; setPlayers: (names: string[]) => void; reset: () => void } {
   const wrap = document.createElement('div');
   wrap.className = 'player-select';
 
@@ -77,6 +77,12 @@ export function createPlayerSelect(
     state,
     setPlayers(names: string[]) {
       rebuildOptions(names);
+    },
+    reset() {
+      select.value = '';
+      newInput.value = '';
+      newInput.hidden = true;
+      onChange();
     },
   };
 }

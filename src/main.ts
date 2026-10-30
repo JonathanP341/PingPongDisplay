@@ -1,16 +1,18 @@
 import { getData } from './api';
 import type { ApiData } from './types';
+import { createDeleteView } from './views/deleteView';
 import { createLogGameView } from './views/logGameView';
 import { createStatsView } from './views/statsView';
 import './styles.css';
 
-type Tab = 'stats' | 'log';
+type Tab = 'stats' | 'log' | 'mistake';
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
 const app = document.querySelector('#app')!;
 let statsView: ReturnType<typeof createStatsView> | null = null;
 let logView: ReturnType<typeof createLogGameView> | null = null;
+let deleteView: ReturnType<typeof createDeleteView> | null = null;
 let activeTab: Tab = 'stats';
 
 const shell = document.createElement('div');
@@ -39,7 +41,13 @@ btnLog.className = 'bottom-nav__btn';
 btnLog.dataset.tab = 'log';
 btnLog.textContent = 'Log Game';
 
-nav.append(btnStats, btnLog);
+const btnMistake = document.createElement('button');
+btnMistake.type = 'button';
+btnMistake.className = 'bottom-nav__btn';
+btnMistake.dataset.tab = 'mistake';
+btnMistake.textContent = 'Mistake?';
+
+nav.append(btnStats, btnLog, btnMistake);
 shell.append(statusBar, main, nav);
 app.appendChild(shell);
 
@@ -54,19 +62,29 @@ function clearStatus() {
   statusBar.textContent = '';
 }
 
+function hashFor(tab: Tab): string {
+  if (tab === 'log') return '#log';
+  if (tab === 'mistake') return '#mistake';
+  return '#stats';
+}
+
 function parseTab(): Tab {
   const hash = location.hash.replace('#', '');
-  return hash === 'log' ? 'log' : 'stats';
+  if (hash === 'log') return 'log';
+  if (hash === 'mistake') return 'mistake';
+  return 'stats';
 }
 
 function showTab(tab: Tab) {
   activeTab = tab;
-  location.hash = tab === 'log' ? '#log' : '#stats';
+  location.hash = hashFor(tab);
   btnStats.classList.toggle('is-active', tab === 'stats');
   btnLog.classList.toggle('is-active', tab === 'log');
+  btnMistake.classList.toggle('is-active', tab === 'mistake');
   if (statsView) statsView.el.classList.toggle('view--hidden', tab !== 'stats');
   if (logView) logView.el.classList.toggle('view--hidden', tab !== 'log');
-  if (tab === 'stats') {
+  if (deleteView) deleteView.el.classList.toggle('view--hidden', tab !== 'mistake');
+  if (tab === 'stats' || tab === 'mistake') {
     void loadData(true);
   }
 }
@@ -79,6 +97,7 @@ async function loadData(quiet = false): Promise<ApiData | null> {
     const data = await getData();
     statsView?.refresh(data);
     logView?.refresh(data);
+    deleteView?.refresh(data);
     clearStatus();
     return data;
   } catch (e) {
@@ -94,11 +113,15 @@ function initViews(data: ApiData) {
     await loadData(true);
     showTab('stats');
   });
-  main.append(statsView.el, logView.el);
+  deleteView = createDeleteView(data, async () => {
+    await loadData(true);
+  });
+  main.append(statsView.el, logView.el, deleteView.el);
 }
 
 btnStats.addEventListener('click', () => showTab('stats'));
 btnLog.addEventListener('click', () => showTab('log'));
+btnMistake.addEventListener('click', () => showTab('mistake'));
 window.addEventListener('hashchange', () => {
   const tab = parseTab();
   if (tab !== activeTab) showTab(tab);

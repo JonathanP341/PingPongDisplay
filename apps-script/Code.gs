@@ -32,6 +32,18 @@ function doPost(e) {
       return jsonOutput_({ ok: false, error: 'Invalid passcode' });
     }
 
+    if (payload.action === 'deleteLatest') {
+      var ssDelete = SpreadsheetApp.getActiveSpreadsheet();
+      var deleteLock = LockService.getScriptLock();
+      deleteLock.waitLock(10000);
+      try {
+        deleteLatestMatch_(ssDelete);
+      } finally {
+        deleteLock.releaseLock();
+      }
+      return jsonOutput_({ ok: true });
+    }
+
     var winner = normalizeName_(payload.winner);
     var loser = normalizeName_(payload.loser);
     var winnerScore = Number(payload.winnerScore);
@@ -124,6 +136,22 @@ function readMatches_(ss) {
     });
   }
   return matches;
+}
+
+function deleteLatestMatch_(ss) {
+  var sheet = ss.getSheetByName(MATCHES_SHEET);
+  if (!sheet) throw new Error('Sheet not found: ' + MATCHES_SHEET);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) throw new Error('No games to delete');
+  var numRows = lastRow - 1;
+  var values = sheet.getRange(2, 1, numRows, 6).getValues();
+  for (var i = values.length - 1; i >= 0; i--) {
+    if (!isEmptyRow_(values[i])) {
+      sheet.deleteRow(i + 2);
+      return;
+    }
+  }
+  throw new Error('No games to delete');
 }
 
 function appendPlayer_(ss, name) {

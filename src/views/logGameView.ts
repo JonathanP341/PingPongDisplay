@@ -138,6 +138,24 @@ export function createLogGameView(
   msg.className = 'form-message';
   msg.hidden = true;
 
+  function resetScoresAndSide() {
+    winnerScore = DEFAULT_WINNER_SCORE;
+    loserScore = DEFAULT_LOSER_SCORE;
+    selectedSide = sides[0] ?? '';
+    renderSideButtons();
+    winnerWheel.setValue(DEFAULT_WINNER_SCORE);
+    syncScoresFromWinner();
+    msg.hidden = true;
+    msg.textContent = '';
+    msg.classList.remove('is-error', 'is-success');
+  }
+
+  function resetNames() {
+    winnerSelect.reset();
+    loserSelect.reset();
+    updatePublish();
+  }
+
   publishBtn.addEventListener('click', async () => {
     msg.hidden = true;
     if (!formValid()) {
@@ -156,15 +174,9 @@ export function createLogGameView(
         loserScore,
         winnerSide: selectedSide,
       });
-      winnerScore = DEFAULT_WINNER_SCORE;
-      loserScore = DEFAULT_LOSER_SCORE;
-      winnerWheel.setValue(DEFAULT_WINNER_SCORE);
-      syncScoresFromWinner();
-      msg.textContent = 'Game published!';
-      msg.hidden = false;
-      msg.classList.remove('is-error');
-      msg.classList.add('is-success');
+      resetScoresAndSide();
       await onPublished();
+      resetNames();
     } catch (e) {
       msg.textContent = e instanceof Error ? e.message : 'Publish failed';
       msg.hidden = false;

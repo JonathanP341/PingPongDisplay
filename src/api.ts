@@ -47,3 +47,20 @@ export async function submitMatch(payload: SubmitMatchPayload): Promise<void> {
     throw new Error(data.error || 'Failed to publish game');
   }
 }
+
+export async function deleteLatestMatch(): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'deleteLatest' }),
+    });
+  } catch {
+    throw new Error('Network error — could not delete game');
+  }
+  const data = await parseResponse(res);
+  if (!data.ok) {
+    throw new Error(data.error || 'Failed to delete game');
+  }
+}
